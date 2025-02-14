@@ -1,0 +1,65 @@
+name: Test, format & PR
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+      - 'infra/**'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  verify-tests-exist:
+    name: Verify tests exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run dummy test
+        run: |
+          sleep 1
+          exit 1
+
+  pytest:
+    name: pytest
+    needs: verify-tests-exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run dummy test
+        run: |
+          sleep 1
+          exit 0
+
+  formatting:
+    name: Format using black
+    needs: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run dummy test
+        run: |
+          sleep 1
+          exit 0
+
+  create-pull-request:
+    needs: formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create or Update Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Function to either create a new PR or update an existing one
+          gh pr create \
+            --title "${{ github.ref_name }}" \
+            --base main \
+            --head "${{ github.ref_name }}" \
+            --body "Automated PR on push to feat/ fix/ or infra/ branch" \
+            || gh pr edit \
+            --title "${{ github.ref_name }}" \
+            --base main
