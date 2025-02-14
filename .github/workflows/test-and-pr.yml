@@ -42,7 +42,7 @@ jobs:
       - name: Run dummy test
         run: |
           sleep 1
-          exit 0
+          exit 1
 
   create-pull-request:
     needs: formatting
