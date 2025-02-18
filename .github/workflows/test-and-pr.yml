@@ -50,17 +50,21 @@ jobs:
             dirpath=$(dirname "$file")
 
             # Remove src/ and package name from path if present
-            if [[ "$dirpath" =~ ^src/ ]]; then
+            if [[ "$dirpath" =~ ^src/[^/]+/.*$ ]]; then
+              # File is in src/pkg/module/...
               testPath=$(echo "$dirpath" | sed -E 's|^src/[^/]+/(.*)$|\1|')
-              if [[ "$testPath" == "$dirpath" ]]; then
-                testPath=""
-              fi
+              expectedTestFile="tests/unit/${testPath}/test_${filename}"
+            elif [[ "$dirpath" =~ ^src/[^/]+$ ]]; then
+              # File is directly in src/pkg/
+              expectedTestFile="tests/unit/test_${filename}"
             else
-              testPath="$dirpath"
+              # For files outside src/ and tests/, fail the check
+              if [[ "$file" != tests/* ]]; then
+                echo "Error: Python file found outside src/ and tests/ directories: $file"
+                echo "All Python code should be in src/ or tests/"
+                exit 1
+              fi
             fi
-
-            # Construct expected test file path
-            expectedTestFile="tests/unit/${testPath}/test_${filename}"
 
             # Check if test file exists
             if [ ! -f "$expectedTestFile" ]; then
