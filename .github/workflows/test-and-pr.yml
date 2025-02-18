@@ -9,7 +9,7 @@ on:
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
 
 jobs:
   verify-tests-exist:
@@ -45,6 +45,7 @@ jobs:
           exit 1
 
   create-pull-request:
+    name: Create PR
     needs: formatting
     runs-on: ubuntu-latest
     steps:
@@ -63,3 +64,25 @@ jobs:
             || gh pr edit \
             --title "${{ github.ref_name }}" \
             --base main
+
+  pytest-matrix:
+    name: Matrix pytest
+    needs: formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run dummy test
+        run: |
+          sleep 1
+          exit 0
+
+  bump-version:
+    name: Bump semantic version
+    needs: pytest-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run dummy test
+        run: |
+          sleep 1
+          exit 0
