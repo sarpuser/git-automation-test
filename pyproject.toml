@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "watchkeeper"
+name = "pkg"
 version = "0.0.0"
 description = "A lightweight service monitoring tool that generates static status pages"
 readme = "README.md"
