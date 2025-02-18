@@ -5,37 +5,116 @@ on:
     branches:
       - 'feat/**'
       - 'fix/**'
-      - 'infra/**'
+    paths:
+      - '**.py'
 
 permissions:
   pull-requests: write
   contents: write
 
 jobs:
-  verify-tests-exist:
-    name: Verify tests exist
+  validate-test-existence:
     runs-on: ubuntu-latest
+    outputs:
+      test_files: ${{ steps.collect-tests.outputs.test_files }}
+      any_changed: ${{ steps.modified-files.outputs.any_changed }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Run dummy test
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get modified Python files
+        id: modified-files
+        uses: tj-actions/modified-files@v45
+        with:
+          files: |
+            **/*.py
+            !**/__init__.py
+      - name: Check if tests exist for modified source files
+        if: steps.modified-files.outputs.any_changed == 'true'
+        id: collect-tests
         run: |
-          sleep 1
-          exit 0
+          hasError=0
+          testFiles=""
 
-  pytest:
-    name: pytest
-    needs: verify-tests-exist
+          # Process each modified file
+          for file in ${{ steps.modified-files.outputs.all_modified_files }}; do
+            # Include test files directly
+            if [[ $file == tests/* ]]; then
+              testFiles="$testFiles $file"
+              continue
+            fi
+
+            # Extract file path components
+            filename=$(basename "$file")
+            dirpath=$(dirname "$file")
+
+            # Remove src/ and package name from path if present
+            if [[ "$dirpath" =~ ^src/ ]]; then
+              testPath=$(echo "$dirpath" | sed -E 's|^src/[^/]+/(.*)$|\1|')
+              if [[ "$testPath" == "$dirpath" ]]; then
+                testPath=""
+              fi
+            else
+              testPath="$dirpath"
+            fi
+
+            # Construct expected test file path
+            expectedTestFile="tests/unit/${testPath}/test_${filename}"
+
+            # Check if test file exists
+            if [ ! -f "$expectedTestFile" ]; then
+              echo "Error: No test file found for $file"
+              echo "Expected test file: $expectedTestFile"
+              hasError=1
+            else
+              echo "✓ Found test file for $file"
+              testFiles="$testFiles $expectedTestFile"
+            fi
+          done
+
+          # Store test files as output
+          echo "test_files=${testFiles}" >> $GITHUB_OUTPUT
+
+          # Exit with error if any test files were missing
+          if [ $hasError -eq 1 ]; then
+            echo "Some test files are missing!"
+            exit 1
+          fi
+
+          echo "All modified files have corresponding test files!"
+
+  run-unit-tests:
+    needs: validate-test-existence
+    if: needs.validate-test-existence.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Run dummy test
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
         run: |
-          sleep 1
-          exit 0
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Run tests with coverage
+        run: |
+          echo "Running tests: ${{ needs.validate-test-existence.outputs.test_files }}"
+          pytest --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=90 ${{ needs.validate-test-existence.outputs.test_files }}
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     file: ./coverage.xml
 
   formatting:
     name: Format using black
-    needs: pytest
+    needs: run-unit-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
