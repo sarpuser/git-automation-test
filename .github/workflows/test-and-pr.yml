@@ -38,7 +38,7 @@ jobs:
           testFiles=""
 
           # Process each modified file
-          for file in ${{ steps.modified-files.outputs.all_modified_files }}; do
+          for file in ${{ steps.modified-files.outputs.all_changed_files }}; do
             # Include test files directly
             if [[ $file == tests/* ]]; then
               testFiles="$testFiles $file"
