@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
       - name: Get modified Python files
         id: modified-files
-        uses: tj-actions/modified-files@v45
+        uses: tj-actions/changed-files@v45
         with:
           files: |
             **/*.py
