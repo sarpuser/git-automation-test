@@ -1,4 +1,4 @@
-from pkg.module.hello7 import hello
+from pkg.module.hello8 import hello
 
 def testHelloWorld():
     """Test that helloWorld returns the correct string."""

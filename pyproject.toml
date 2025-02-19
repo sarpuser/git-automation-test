@@ -100,6 +100,7 @@ convention = "google"
 [tool.ruff.lint.isort]
 known-first-party = ["pkg"]
 combine-as-imports = true
+lines-after-imports = 1
 
 # Format settings - use tabs and double quotes
 [tool.ruff.format]
@@ -131,9 +132,4 @@ warn_no_return = true
 warn_unreachable = true
 implicit_reexport = false
 strict_equality = true
-
-# Less strict typing in tests
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+exclude = ["tests/"]
