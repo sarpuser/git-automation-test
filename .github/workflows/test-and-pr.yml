@@ -106,9 +106,16 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install dependencies
+      - name: Install ruff & mypy
         run: |
           pip install ruff mypy
+      - name: Cache ruff & mypy
+        uses: actions/cache@v3
+        with:
+          path: |
+            .ruff_cache
+            .mypy_cache
+          key: ${{ runner.os }}-linting-${{ hashFiles('**/*.py') }}
       - name: Lint code (ruff)
         run: |
           ruff check .
@@ -132,8 +139,13 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
           pip install .
+          pip install pytest pytest-cov
+      - name: Cache pytest
+        uses: actions/cache@v3
+        with:
+          path: .pytest_cache
+          key: ${{ runner.os }}-unittest-${{ hashFiles('**/*.py') }}
       - name: Run tests with coverage
         run: |
           echo "Running tests: ${{ needs.check-test-existence.outputs.test_files }}"
@@ -176,21 +188,27 @@ jobs:
         run: |
           # Function to either create a new PR or update an existing one
           gh pr create \
-            --title "${{ github.ref_name }}" \
+            --title "Auto-PR from valid push to ${{ github.ref_name }}" \
             --base main \
             --head "${{ github.ref_name }}" \
-            --body "Automated PR on push to feat/ fix/ or infra/ branch" \
+            --body "[X] Unit tests exist\
+            [X] Passed linter\
+            [X] Passed type checking\
+            [X] Passed unit tests\
+            [X] Formatted\
+            [ ] Integration tests exist\
+            [ ] Integration tests passing" \
             || gh pr edit \
-            --title "${{ github.ref_name }}" \
+            --title "Auto-PR from push to ${{ github.ref_name }}" \
             --base main
 
   bump-version:
     name: Bump semantic version
-    needs: create-pull-request
+    needs: run-unit-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run dummy test
         run: |
           sleep 1
-          exit 0
+          exit 1
