@@ -95,7 +95,7 @@ jobs:
           echo "All modified files have corresponding test files!"
 
   lint-code:
-    name: Lint code (ruff)
+    name: Lint code and check formatting (ruff)
     needs: check-test-existence
     runs-on: ubuntu-latest
     steps:
@@ -122,6 +122,9 @@ jobs:
       - name: Check type defs (mypy)
         run: |
           mypy .
+      - name: Check formatting
+        run: |
+          ruff format --check .
 
   run-unit-tests:
     name: Run unit tests
@@ -151,30 +154,6 @@ jobs:
           echo "Running tests: ${{ needs.check-test-existence.outputs.test_files }}"
           pytest ${{ needs.check-test-existence.outputs.test_files }}
 
-  format-code:
-    name: Format code (ruff)
-    needs: run-unit-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          pip install ruff
-      - name: Format code (ruff)
-        run: |
-          ruff format .
-      - name: Commit formatting changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git diff --quiet || (git add . && git commit -m "Apply ruff formatting" && git push)
-
   create-pull-request:
     name: Create PR
     needs: run-unit-tests
@@ -191,24 +170,13 @@ jobs:
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
             --base main \
             --head "${{ github.ref_name }}" \
-            --body "[X] Unit tests exist\
-            [X] Passed linter\
-            [X] Passed type checking\
-            [X] Passed unit tests\
-            [X] Formatted\
-            [ ] Integration tests exist\
+            --body "[X] Unit tests exist
+            [X] Passed linter
+            [X] Passed type checking
+            [X] Passed Formatting
+            [X] Passed unit tests
+            [ ] Integration tests exist
             [ ] Integration tests passing" \
             || gh pr edit \
             --title "Auto-PR from push to ${{ github.ref_name }}" \
             --base main
-
-  bump-version:
-    name: Bump semantic version
-    needs: run-unit-tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run dummy test
-        run: |
-          sleep 1
-          exit 1
