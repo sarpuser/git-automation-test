@@ -1,4 +1,4 @@
-name: Test, format & PR
+name: Unit test on push
 
 on:
   push:
@@ -13,7 +13,8 @@ permissions:
   contents: write
 
 jobs:
-  validate-test-existence:
+  check-test-existence:
+    name: Verify tests exist for modified files
     runs-on: ubuntu-latest
     outputs:
       test_files: ${{ steps.collect-tests.outputs.test_files }}
@@ -88,9 +89,35 @@ jobs:
 
           echo "All modified files have corresponding test files!"
 
+  lint-code:
+    name: Lint code (ruff)
+    needs: check-test-existence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          pip install ruff mypy
+      - name: Lint code (ruff)
+        run: |
+          ruff check .
+      - name: Install local package
+        run: |
+          pip install .
+      - name: Check type defs (mypy)
+        run: |
+          mypy .
+
   run-unit-tests:
-    needs: validate-test-existence
-    if: needs.validate-test-existence.outputs.any_changed == 'true'
+    name: Run unit tests
+    needs: [lint-code, check-test-existence]
+    if: needs.check-test-existence.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -102,34 +129,41 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install .
       - name: Run tests with coverage
         run: |
-          echo "Running tests: ${{ needs.validate-test-existence.outputs.test_files }}"
-          pytest ${{ needs.validate-test-existence.outputs.test_files }}
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     file: ./coverage.xml
+          echo "Running tests: ${{ needs.check-test-existence.outputs.test_files }}"
+          pytest ${{ needs.check-test-existence.outputs.test_files }}
 
-  formatting:
-    name: Format using black
+  format-code:
+    name: Format code (black)
     needs: run-unit-tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Run dummy test
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
         run: |
-          sleep 1
-          exit 1
+          pip install black
+      - name: Format code (black)
+        run: |
+          black --check .
+      - name: Commit formatting changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git diff --quiet || (git add . && git commit -m "Apply Black formatting" && git push)
 
   create-pull-request:
     name: Create PR
-    needs: formatting
+    needs: format-code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -148,20 +182,9 @@ jobs:
             --title "${{ github.ref_name }}" \
             --base main
 
-  pytest-matrix:
-    name: Matrix pytest
-    needs: formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run dummy test
-        run: |
-          sleep 1
-          exit 0
-
   bump-version:
     name: Bump semantic version
-    needs: pytest-matrix
+    needs: create-pull-request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

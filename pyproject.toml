@@ -33,3 +33,104 @@ where = ["src"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "--cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=90"
+
+[tool.ruff]
+# Target version
+target-version = "py311"
+
+# Enable required linting rules
+select = [
+    "E",   # pycodestyle errors
+    "F",   # Pyflakes
+    "I",   # isort
+    "C90", # McCabe complexity
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations (type annotations)
+    "RUF", # Ruff-specific rules
+    "PYI", # stub files
+    "PGH", # pygrep-hooks including type annotation issues
+]
+# Explicitly exclude naming rules
+ignore = ["N"]
+
+# Exclude a variety of commonly ignored directories
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Line length
+line-length = 88
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Mccabe complexity settings
+[tool.ruff.mccabe]
+max-complexity = 10
+
+# Google docstring convention
+[tool.ruff.pydocstyle]
+convention = "google"
+
+# Import sorting settings
+[tool.ruff.isort]
+known-first-party = ["your_package_name"]
+combine-as-imports = true
+
+# Format settings - use tabs and double quotes
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"
+line-ending = "auto"
+# Don't reformat docstrings
+docstring-code-format = false
+
+# Enforce type annotations
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+suppress-none-returning = true
+
+# mypy configuration for strong typing
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+implicit_reexport = false
+strict_equality = true
+
+# Less strict typing in tests
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
