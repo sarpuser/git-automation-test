@@ -1,13 +1,13 @@
 # test_hello.py
-from pkg.module import helloWorld
+from pkg.module.hello6 import hello
 
 def testHelloWorld():
     """Test that helloWorld returns the correct string."""
     expected = "hello world"
-    actual = helloWorld()
+    actual = hello()
     assert actual == expected
 
 def testHelloWorldType():
     """Test that helloWorld returns a string."""
-    result = helloWorld()
+    result = hello()
     assert isinstance(result, str)
