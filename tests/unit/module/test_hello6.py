@@ -1,4 +1,3 @@
-# test_hello.py
 from pkg.module.hello6 import hello
 
 def testHelloWorld():
