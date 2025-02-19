@@ -107,9 +107,6 @@ jobs:
       - name: Lint code (ruff)
         run: |
           ruff check .
-      - name: Install local package
-        run: |
-          pip install .
       - name: Check type defs (mypy)
         run: |
           mypy .
@@ -138,7 +135,7 @@ jobs:
           pytest ${{ needs.check-test-existence.outputs.test_files }}
 
   format-code:
-    name: Format code (black)
+    name: Format code (ruff)
     needs: run-unit-tests
     runs-on: ubuntu-latest
     steps:
@@ -151,15 +148,15 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         run: |
-          pip install black
-      - name: Format code (black)
+          pip install ruff
+      - name: Format code (ruff)
         run: |
-          black --check .
+          ruff format .
       - name: Commit formatting changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git diff --quiet || (git add . && git commit -m "Apply Black formatting" && git push)
+          git diff --quiet || (git add . && git commit -m "Apply ruff formatting" && git push)
 
   create-pull-request:
     name: Create PR
