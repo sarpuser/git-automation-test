@@ -89,16 +89,16 @@ select = [
 ignore = ["N"]
 
 # Mccabe complexity settings
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10
 
 # Google docstring convention
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 # Import sorting settings
-[tool.ruff.isort]
-known-first-party = ["your_package_name"]
+[tool.ruff.lint.isort]
+known-first-party = ["pkg"]
 combine-as-imports = true
 
 # Format settings - use tabs and double quotes
