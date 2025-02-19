@@ -40,6 +40,11 @@ jobs:
 
           # Process each modified file
           for file in ${{ steps.modified-files.outputs.all_changed_files }}; do
+            # Skip if test file already is added to list
+            if [[ $testFiles == *"$file"* ]]; then
+              continue
+            fi
+
             # Include test files directly
             if [[ $file == tests/* ]]; then
               testFiles="$testFiles $file"

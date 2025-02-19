@@ -1,4 +1,10 @@
-.venv
+# VS Code
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Distribution / packaging
 .Python
@@ -20,6 +26,30 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Linting
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Dev tools
 .mypy_cache
 .ruff_cache
