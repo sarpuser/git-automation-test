@@ -122,7 +122,7 @@ jobs:
       - name: Check type defs (mypy)
         run: |
           mypy .
-      - name: Check formatting
+      - name: Check formatting (ruff)
         run: |
           ruff format --check .
 
@@ -165,18 +165,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Function to either create a new PR or update an existing one
           gh pr create \
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
             --base main \
             --head "${{ github.ref_name }}" \
             --body "[X] Unit tests exist
-            [X] Passed linter
-            [X] Passed type checking
-            [X] Passed Formatting
-            [X] Passed unit tests
-            [ ] Integration tests exist
-            [ ] Integration tests passing" \
-            || gh pr edit \
-            --title "Auto-PR from push to ${{ github.ref_name }}" \
-            --base main
+             - [X] Passed linter
+             - [X] Passed type checking
+             - [X] Passed unit tests
+             - [X] Passed formatting
+             - [ ] Integration tests exist
+             - [ ] Integration tests passing"\
+            || echo "Pull request already exists"
