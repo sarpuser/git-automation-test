@@ -3,7 +3,7 @@ from pkg.module.hello15 import hello
 
 def testHelloWorld():
 	"""Test that helloWorld returns the correct string."""
-	expected = "hello world"
+	expected = "hi world"
 	actual = hello()
 	assert actual == expected
 
