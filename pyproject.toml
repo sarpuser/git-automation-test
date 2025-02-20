@@ -100,7 +100,7 @@ convention = "google"
 [tool.ruff.lint.isort]
 known-first-party = ["pkg"]
 combine-as-imports = true
-lines-after-imports = 1
+# lines-after-imports = 1
 
 # Format settings - use tabs and double quotes
 [tool.ruff.format]
