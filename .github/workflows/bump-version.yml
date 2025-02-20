@@ -1,0 +1,43 @@
+name: Bump version on PR merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev
+
+jobs:
+  version-bump:
+    if: github.event.pull_request.merged == true && (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Authenticate as GitHub App
+      - name: Generate token
+        id: generate-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.PROTECTED_UPDATE_APP_ID }}
+          private_key: ${{ secrets.PROTECTED_UPDATE_PRIVATE_KEY }}
+
+      - name: Determine if patch or minor
+        id: determine-version-bump-type
+        run: |
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'api-change') }}" == "true" ]]; then
+            echo "BUMP_TYPE=major" >> $GITHUB_OUTPUT
+          elif [[ $HEAD_REF == feat/* ]]; then
+            echo "BUMP_TYPE=minor" >> $GITHUB_OUTPUT
+          elif [[ $HEAD_REF == fix/* ]]; then
+            echo "BUMP_TYPE=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        uses: callowayproject/bump-my-version@master
+        with:
+          args: ${{ steps.determine-version-bump-type.outputs.BUMP_TYPE }}
+          github-token: ${{ steps.generate-token.outputs.token }}

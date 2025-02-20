@@ -100,7 +100,11 @@ convention = "google"
 [tool.ruff.lint.isort]
 known-first-party = ["pkg"]
 combine-as-imports = true
-# lines-after-imports = 1
+
+# Enforce type annotations
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+suppress-none-returning = true
 
 # Format settings - use tabs and double quotes
 [tool.ruff.format]
@@ -109,11 +113,6 @@ indent-style = "tab"
 line-ending = "auto"
 # Don't reformat docstrings
 docstring-code-format = false
-
-# Enforce type annotations
-[tool.ruff.lint.flake8-annotations]
-mypy-init-return = true
-suppress-none-returning = true
 
 # mypy configuration for strong typing
 [tool.mypy]
@@ -133,3 +132,20 @@ warn_unreachable = true
 implicit_reexport = false
 strict_equality = true
 exclude = ["tests/"]
+
+[tool.bumpversion]
+current_version = "0.0.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = false
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = false
+message = "Bump version: {current_version} → {new_version}"
+commit_args = ""
