@@ -110,9 +110,9 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
-      - name: Install ruff & mypy
+      - name: Install ruff, mypy & bandit
         run: |
-          pip install ruff mypy
+          pip install ruff mypy bandit
       - name: Cache ruff
         uses: actions/cache@v3
         with:
@@ -129,6 +129,9 @@ jobs:
       - name: Check type defs (mypy)
         run: |
           mypy .
+      - name: Check for security vulnerabilities (bandit)
+        run: |
+          bandit -r src/
       - name: Check formatting (ruff)
         run: |
           ruff format --check .
