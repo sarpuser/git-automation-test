@@ -1,2 +1,2 @@
 def hello() -> str:
-	return "hi5 world"
+	return "hi6 world"
