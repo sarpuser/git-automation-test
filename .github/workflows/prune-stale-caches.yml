@@ -3,6 +3,9 @@ name: Prune stale caches
 on:
   delete
 
+permissions:
+  actions: write    # Required for deleting caches
+
 jobs:
   prune-stale-caches:
     runs-on: ubuntu-latest
