@@ -107,6 +107,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
       - name: Install ruff & mypy
         run: |
           pip install ruff mypy
@@ -144,10 +147,13 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
       - name: Install dependencies
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -e .
+          pip install .
           pip install pytest pytest-cov
       - name: Cache pytest
         uses: actions/cache@v3
