@@ -1,4 +1,4 @@
-name: Create PR for infra changes and bypass status checks
+name: Auto merge infra changes
 on:
   push:
     branches:
@@ -26,9 +26,9 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh pr create \
-            --title " ${{ github.ref_name }}" \
+            --title "Auto merge ${{ github.ref_name }}" \
             --base dev \
-            --head "${{ github.ref_name }}" \
+            --head "${{ github.sha }}" \
             --body "Infrastructure changes"
             echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
 

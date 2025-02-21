@@ -167,7 +167,7 @@ jobs:
         run: |
           gh pr create \
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
-            --base main \
+            --base dev \
             --head "${{ github.ref_name }}" \
             --body "[X] Unit tests exist
              - [X] Passed linter
