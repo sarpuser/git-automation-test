@@ -28,8 +28,8 @@ jobs:
           gh pr create \
             --title "Auto merge ${{ github.ref_name }}" \
             --base dev \
-            --head "${{ github.sha }}" \
-            --body "Infrastructure changes"
+            --head "${{ github.ref_name }}" \
+            --body "${{ github.event.head_commit.message }}"
             echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
 
       - name: Merge Pull Request

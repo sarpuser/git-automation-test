@@ -169,7 +169,7 @@ jobs:
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
             --base dev \
             --head "${{ github.ref_name }}" \
-            --body "[X] Unit tests exist
+            --body " - [X] Unit tests exist
              - [X] Passed linter
              - [X] Passed type checking
              - [X] Passed unit tests
