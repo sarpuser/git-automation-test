@@ -8,10 +8,10 @@ on:
 
 jobs:
   version-bump:
-    if: github.event.pull_request.merged == true && (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/'))
+    if: github.event.pull_request.merged == true && (startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -26,7 +26,7 @@ jobs:
       - name: Determine if patch or minor
         id: determine-version-bump-type
         run: |
-          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.head_ref }}"
 
           if [[ "${{ contains(github.event.pull_request.labels.*.name, 'api-change') }}" == "true" ]]; then
             echo "BUMP_TYPE=major" >> $GITHUB_OUTPUT

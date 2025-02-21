@@ -95,33 +95,43 @@ jobs:
           echo "All modified files have corresponding test files!"
 
   lint-code:
-    name: Lint code and check formatting (ruff)
+    name: Lint code and check formatting
     needs: check-test-existence
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup Python
+        id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install ruff & mypy
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install ruff, mypy & bandit
         run: |
-          pip install ruff mypy
-      - name: Cache ruff & mypy
+          pip install ruff mypy bandit
+      - name: Cache ruff
         uses: actions/cache@v3
         with:
-          path: |
-            .ruff_cache
-            .mypy_cache
-          key: ${{ runner.os }}-linting-${{ hashFiles('**/*.py') }}
+          path: .ruff_cache
+          key: ruff-static-py${{ steps.setup-python.outputs.python-version }}-${{ runner.os }}
+      - name: Cache mypy
+        uses: actions/cache@v3
+        with:
+          path: .mypy_cache
+          key: mypy-static-py${{ steps.setup-python.outputs.python-version }}-${{ runner.os }}
       - name: Lint code (ruff)
         run: |
           ruff check .
       - name: Check type defs (mypy)
         run: |
           mypy .
+      - name: Check for security vulnerabilities (bandit)
+        run: |
+          bandit -r src/
       - name: Check formatting (ruff)
         run: |
           ruff format --check .
@@ -135,10 +145,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Python
+        id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
       - name: Install dependencies
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -148,7 +162,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .pytest_cache
-          key: ${{ runner.os }}-unittest-${{ hashFiles('**/*.py') }}
+          key: pytest-static-py${{ steps.setup-python.outputs.python-version }}-${{ runner.os }}
       - name: Run tests with coverage
         run: |
           echo "Running tests: ${{ needs.check-test-existence.outputs.test_files }}"
@@ -167,13 +181,13 @@ jobs:
         run: |
           gh pr create \
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
-            --base main \
+            --base dev \
             --head "${{ github.ref_name }}" \
-            --body "[X] Unit tests exist
-             - [X] Passed linter
-             - [X] Passed type checking
-             - [X] Passed unit tests
-             - [X] Passed formatting
-             - [ ] Integration tests exist
-             - [ ] Integration tests passing"\
+            --body "- [X] Unit tests exist
+            - [X] Passed linter
+            - [X] Passed type checking
+            - [X] Passed unit tests
+            - [X] Passed formatting
+            - [ ] Integration tests exist
+            - [ ] Integration tests passing"\
             || echo "Pull request already exists"
