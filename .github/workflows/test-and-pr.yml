@@ -95,7 +95,7 @@ jobs:
           echo "All modified files have corresponding test files!"
 
   lint-code:
-    name: Lint code and check formatting (ruff)
+    name: Lint code and check formatting
     needs: check-test-existence
     runs-on: ubuntu-latest
     steps:
@@ -169,11 +169,11 @@ jobs:
             --title "Auto-PR from valid push to ${{ github.ref_name }}" \
             --base dev \
             --head "${{ github.ref_name }}" \
-            --body " - [X] Unit tests exist
-             - [X] Passed linter
-             - [X] Passed type checking
-             - [X] Passed unit tests
-             - [X] Passed formatting
-             - [ ] Integration tests exist
-             - [ ] Integration tests passing"\
+            --body "- [X] Unit tests exist
+            - [X] Passed linter
+            - [X] Passed type checking
+            - [X] Passed unit tests
+            - [X] Passed formatting
+            - [ ] Integration tests exist
+            - [ ] Integration tests passing"\
             || echo "Pull request already exists"
