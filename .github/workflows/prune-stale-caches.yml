@@ -9,7 +9,7 @@ permissions:
 jobs:
   prune-stale-caches:
     runs-on: ubuntu-latest
-    if: github.event.ref_type == 'branch'  # Only run on branch deletion
+    if: github.event.ref_type == 'branch' && (startsWith(github.event.ref, 'feat/') || startsWith(github.event.ref, 'fix/'))
     steps:
       - uses: actions/checkout@v4
       - name: Delete branch caches
