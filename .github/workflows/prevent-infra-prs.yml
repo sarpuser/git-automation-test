@@ -1,11 +1,11 @@
-name: Close PRs with workflow changes
+name: Close PRs with infrastructure changes
 
 on:
   pull_request_target:
     types: [opened, synchronize]
 
 jobs:
-  check-github-changes:
+  check-infra-changes:
     # Simple check if PR is from a fork
     if: github.event.pull_request.head.repo.fork == true
     runs-on: ubuntu-latest
@@ -26,10 +26,10 @@ jobs:
           files: |
             .github/**
 
-      - name: Comment and close PR if .github modified
-        if: steps.changed-files.outputs.any_modified == 'true'
+      - name: Comment and close PR if it contains infrastructure changes
+        if: steps.changed-files.outputs.any_modified == 'true' || startsWith(github.event.pull_request.head.ref, 'infra/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh pr edit --title "[Auto-Closed] ${{ github.event.pull_request.title }}"
-          gh pr close ${{ github.event.pull_request.number }} --comment "🚫 This PR has been automatically closed because it contains changes to the .github directory. For security reasons, we do not accept such changes from forks. Please open an issue instead."
+          gh pr close ${{ github.event.pull_request.number }} --comment "🚫 This PR has been automatically closed because it either contains changes to the .github directory, or is originating from an infra/ branch. For security reasons, we do not accept such changes from forks. Please open an issue instead."
