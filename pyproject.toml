@@ -132,11 +132,12 @@ warn_unreachable = true
 implicit_reexport = false
 strict_equality = true
 exclude = [
-    "build/*",
-    "dist/*",
-    ".eggs/*",
-    "*.egg-info/*",
-    "tests/*"
+    "build/.*",
+    "dist/.*",
+    "\\.eggs/.*",
+    ".*\\.egg-info/.*",
+    "tests/.*"
+
 ]
 
 [tool.bumpversion]
