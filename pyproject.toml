@@ -131,7 +131,13 @@ warn_no_return = true
 warn_unreachable = true
 implicit_reexport = false
 strict_equality = true
-exclude = ["tests/"]
+exclude_patterns = [
+    "build/*",
+    "dist/*",
+    ".eggs/*",
+    "*.egg-info/*",
+    "tests/*"
+]
 
 [tool.bumpversion]
 current_version = "0.3.2"
